@@ -12,7 +12,9 @@ func main() {
 
 	router.GET("/customers", handlers.GetAllCustomers)
 	router.GET("/customer/:id", handlers.GetCustomerByID)
+	router.POST("customer/create", handlers.CreateCustomer)
 	router.PUT("/customer/update", handlers.UpdateCustomerByID)
+	router.DELETE("/customer/delete/:id", handlers.DeleteCustomerByID)
 
 	router.Run("localhost:8081")
 }

@@ -30,7 +30,7 @@ func GetAllCustomers() ([]models.Customer, error) {
 		customers = append(customers, models.Customer{
 			CustomerId:    tempCustomer.CustomerId,
 			FirstName:     utils.NullToString(tempCustomer.FirstName),
-			MiddleInitial: utils.NullToString(tempCustomer.MiddleInitial),
+			MiddleInitial: utils.NullStringToPtr(tempCustomer.MiddleInitial),
 			LastName:      utils.NullToString(tempCustomer.LastName),
 		})
 	}
@@ -61,10 +61,46 @@ func GetCustomerByID(id uuid.UUID) (*models.Customer, error) {
 	customer := &models.Customer{
 		CustomerId:    tempCustomer.CustomerId,
 		FirstName:     utils.NullToString(tempCustomer.FirstName),
-		MiddleInitial: utils.NullToString(tempCustomer.MiddleInitial),
+		MiddleInitial: utils.NullStringToPtr(tempCustomer.MiddleInitial),
 		LastName:      utils.NullToString(tempCustomer.LastName),
 	}
 	return customer, nil
+}
+
+func CreateCustomer(customer models.Customer) (err error) {
+	tx, err := db.DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		} else {
+			_ = tx.Commit()
+		}
+	}()
+
+	var middleInitial sql.NullString
+	if customer.MiddleInitial != nil {
+		middleInitial = sql.NullString{String: *customer.MiddleInitial, Valid: true}
+	} else {
+		middleInitial = sql.NullString{Valid: false}
+	}
+
+	query := `
+		INSERT INTO customers (customeruuid, firstname, middleinitial, lastname)
+		VALUES ($1, $2, $3, $4)
+	`
+
+	_, err = db.DB.Exec(query,
+		customer.CustomerId,
+		customer.FirstName,
+		middleInitial,
+		customer.LastName,
+	)
+
+	return err
 }
 
 func UpdateCustomerByID(update models.UpdateCustomer) (err error) {
@@ -113,4 +149,26 @@ func UpdateCustomerByID(update models.UpdateCustomer) (err error) {
 	_, err = tx.Exec(query, args...)
 
 	return err
+}
+
+func DeleteCustomerByID(id uuid.UUID) (err error) {
+	tx, err := db.DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		} else {
+			_ = tx.Commit()
+		}
+	}()
+
+	query := `DELETE FROM customers WHERE customeruuid = $1`
+	_, err = tx.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

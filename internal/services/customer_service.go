@@ -26,7 +26,17 @@ func GetCustomerByID(id uuid.UUID) (*models.Customer, error) {
 	return customer, nil
 }
 
+func CreateCustomer(customer models.Customer) error {
+	err := repositories.CreateCustomer(customer)
+	return err
+}
+
 func UpdateCustomerByID(update models.UpdateCustomer) error {
 	err := repositories.UpdateCustomerByID(update)
+	return err
+}
+
+func DeleteCustomerByID(id uuid.UUID) error {
+	err := repositories.DeleteCustomerByID(id)
 	return err
 }

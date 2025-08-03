@@ -9,7 +9,7 @@ import (
 type Customer struct {
 	CustomerId    uuid.UUID `json:"customerid" db:"customeruuid"`
 	FirstName     string    `json:"firstname" db:"firstname"`
-	MiddleInitial string    `json:"middleinitial" db:"middleinitial"`
+	MiddleInitial *string   `json:"middleinitial" db:"middleinitial"`
 	LastName      string    `json:"lastname" db:"lastname"`
 }
 

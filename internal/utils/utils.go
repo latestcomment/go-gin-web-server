@@ -8,3 +8,10 @@ func NullToString(s sql.NullString) string {
 	}
 	return ""
 }
+
+func NullStringToPtr(ns sql.NullString) *string {
+	if ns.Valid {
+		return &ns.String
+	}
+	return nil
+}
